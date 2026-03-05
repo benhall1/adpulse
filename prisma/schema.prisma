@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth Models (NextAuth) ──────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  adAccounts AdAccount[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Business Models ─────────────────────────────────────────────
+
+model AdAccount {
+  id                String @id @default(cuid())
+  userId            String
+  metaAccountId     String @unique
+  name              String
+  encryptedToken    String @db.Text
+  tokenIv           String
+  tokenAuthTag      String
+  lastSyncAt        DateTime?
+  syncStatus        String   @default("idle") // idle | syncing | error
+  alertsEnabled     Boolean  @default(true)
+  alertThreshold    String   @default("WATCH") // WATCH | CRITICAL
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns Campaign[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Campaign {
+  id             String @id @default(cuid())
+  adAccountId    String
+  metaCampaignId String @unique
+  name           String
+  status         String
+  objective      String?
+
+  adAccount AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
+  adSets    AdSet[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdSet {
+  id          String @id @default(cuid())
+  campaignId  String
+  metaAdSetId String @unique
+  name        String
+  status      String
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  ads      Ad[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ad {
+  id          String   @id @default(cuid())
+  adSetId     String
+  metaAdId    String   @unique
+  name        String
+  status      String
+  creativeUrl String?
+  thumbnailUrl String?
+  launchedAt  DateTime?
+
+  adSet         AdSet           @relation(fields: [adSetId], references: [id], onDelete: Cascade)
+  dailyMetrics  AdDailyMetric[]
+  fatigueScores FatigueScore[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdDailyMetric {
+  id          String   @id @default(cuid())
+  adId        String
+  date        DateTime @db.Date
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  spend       Float    @default(0)
+  ctr         Float    @default(0)
+  cpm         Float    @default(0)
+  cpc         Float    @default(0)
+  conversions Int      @default(0)
+  costPerResult Float?
+  frequency   Float    @default(0)
+
+  ad Ad @relation(fields: [adId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([adId, date])
+}
+
+model FatigueScore {
+  id              String   @id @default(cuid())
+  adId            String
+  date            DateTime @db.Date
+  overallScore    Float
+  status          String   // HEALTHY | WATCH | CRITICAL
+  ctrDecline      Float
+  cpmIncrease     Float
+  frequencySat    Float
+  conversionDrop  Float
+
+  ad Ad @relation(fields: [adId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([adId, date])
+}
+
+model AlertHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  adId      String
+  adName    String
+  status    String
+  score     Float
+  sentAt    DateTime @default(now())
+  channel   String   @default("email")
+}
