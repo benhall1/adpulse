@@ -30,7 +30,7 @@ export function LandingPage() {
       </nav>
 
       {/* ════════ HERO ════════ */}
-      <section className="mx-auto max-w-5xl px-6 pb-20 pt-24 md:pt-36">
+      <section className="mx-auto max-w-5xl px-6 pb-20 pt-12 md:pt-16">
         <div className="max-w-2xl">
           <p className="mb-4 text-sm font-medium text-muted-foreground">
             Ad fatigue monitoring for Meta
