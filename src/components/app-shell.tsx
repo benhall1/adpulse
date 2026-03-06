@@ -80,19 +80,19 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/login" });
-                }}
-              >
+            <form
+              action={async () => {
+                "use server";
+                await signOut({ redirectTo: "/login" });
+              }}
+            >
+              <DropdownMenuItem asChild>
                 <button type="submit" className="flex w-full items-center gap-2 text-sm">
                   <LogOut className="h-3.5 w-3.5" />
                   Sign out
                 </button>
-              </form>
-            </DropdownMenuItem>
+              </DropdownMenuItem>
+            </form>
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
