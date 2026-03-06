@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { FractalBg } from "@/components/fractal-bg";
 import {
   Activity,
   Bell,
@@ -15,7 +16,7 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ── Nav ── */}
-      <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
+      <nav className="relative z-10 mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2.5">
           <Activity className="h-5 w-5 text-foreground" />
           <span className="text-[15px] font-semibold tracking-tight">
@@ -30,8 +31,11 @@ export function LandingPage() {
       </nav>
 
       {/* ════════ HERO ════════ */}
-      <section className="mx-auto max-w-5xl px-6 pb-20 pt-12 md:pt-16">
-        <div className="max-w-2xl">
+      <section className="relative mx-auto max-w-5xl px-6 pb-20 pt-12 md:pt-16">
+        <div className="pointer-events-none absolute -left-32 -right-32 -top-20 bottom-0 overflow-hidden">
+          <FractalBg />
+        </div>
+        <div className="relative z-10 max-w-2xl">
           <p className="mb-4 text-sm font-medium text-muted-foreground">
             Ad fatigue monitoring for Meta
           </p>
@@ -60,7 +64,7 @@ export function LandingPage() {
         </div>
 
         {/* ── Dashboard mock ── */}
-        <div className="mt-20 rounded-lg border border-border bg-card">
+        <div className="relative z-10 mt-20 rounded-lg border border-border bg-card">
           {/* Title bar */}
           <div className="flex items-center justify-between border-b border-border px-5 py-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
